@@ -41,7 +41,7 @@ let settings = {
   bgColor: '#0a0a0f', bgType: 'color', bgOpacity: 80,
   sensitivity: 5, smoothing: 80, barCount: 64, lineWidth: 2,
   rotSpeed: 3, glow: true, mirror: false, beatPulse: true,
-  gradient: true, stars: false, flash: false, beatShake: true, eq: 'flat',
+  gradient: true, stars: false, flash: false, beatShake: true, shakeStrength: 18, eq: 'flat',
 };
 
 let adminSettings = {
@@ -84,6 +84,12 @@ function hideSplash() {
     setTimeout(() => {
       splash.style.display = 'none';
       try { splash.remove(); } catch(e) {}
+      // Smooth reveal of active page after splash is gone
+      const activePage = document.querySelector('.page.active');
+      if (activePage) {
+        activePage.classList.add('page-reveal');
+        setTimeout(() => activePage.classList.remove('page-reveal'), 900);
+      }
     }, 520);
   }, 600);
 }
@@ -683,7 +689,8 @@ function detectBPM(dataArray) {
     bpmFlashTimeout = setTimeout(() => dot.classList.remove('beat'), 80);
     // Trigger beat shake
     if (settings.beatShake) {
-      shakeIntensity = 6 + (bass / 255) * 10;
+      const strength = settings.shakeStrength;
+      shakeIntensity = strength + (bass / 255) * (strength * 1.5);
     }
   }  // closes: if (bass > 180 && now - lastBeat > 250)
 }
@@ -736,7 +743,7 @@ let flashAlpha = 0;
 
 // Beat Shake state
 let shakeIntensity = 0;
-let shakeDecay = 0.85;
+let shakeDecay = 0.75;
 let shakeX = 0;
 let shakeY = 0;
 
@@ -769,11 +776,14 @@ function startVisualization() {
 
     // Beat Shake — translate canvas randomly scaled to shakeIntensity
     if (settings.beatShake && shakeIntensity > 0.3) {
-      shakeX = (Math.random() - 0.5) * shakeIntensity * 2;
-      shakeY = (Math.random() - 0.5) * shakeIntensity * 2;
+      shakeX = (Math.random() - 0.5) * shakeIntensity * 2.5;
+      shakeY = (Math.random() - 0.5) * shakeIntensity * 2.5;
+      const shakeRot = (Math.random() - 0.5) * (shakeIntensity * 0.003);
       shakeIntensity *= shakeDecay;
       ctx.save();
-      ctx.translate(shakeX, shakeY);
+      ctx.translate(W / 2 + shakeX, H / 2 + shakeY);
+      ctx.rotate(shakeRot);
+      ctx.translate(-(W / 2), -(H / 2));
     } else {
       shakeIntensity = 0;
       shakeX = 0; shakeY = 0;
@@ -792,6 +802,7 @@ function startVisualization() {
       case 'matrix':   drawMatrix(dataArray, W, H, n, sens); break;
       case 'dna':      drawDNA(dataArray, W, H, bufferLength, sens); break;
       case 'galaxy_mode': drawGalaxy(dataArray, W, H, n, sens); break;
+      case 'planet':   drawPlanet(dataArray, W, H, n, sens); break;
     }
 
     // Restore shake transform
@@ -1070,6 +1081,132 @@ function drawGalaxy(data, W, H, n, sens) {
   ctx.globalAlpha = 1; setGlow(false);
 }
 
+// 13. PLANET / ORBIT
+let planetRingAngle = 0;
+function drawPlanet(data, W, H, n, sens) {
+  const cx = W / 2, cy = H / 2;
+  const baseR = Math.min(W, H) * 0.18 + beatValue * 14;
+  planetRingAngle += 0.008;
+
+  // --- Outer audio bars radiating from circle ---
+  for (let i = 0; i < n; i++) {
+    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const val = (data[i] / 255) * sens * 0.55;
+    const barLen = val * Math.min(W, H) * 0.32;
+    const x1 = cx + Math.cos(angle) * (baseR + 4);
+    const y1 = cy + Math.sin(angle) * (baseR + 4);
+    const x2 = cx + Math.cos(angle) * (baseR + 4 + barLen);
+    const y2 = cy + Math.sin(angle) * (baseR + 4 + barLen);
+    const hue = (i / n) * 260 + 180;
+    const col = settings.gradient ? `hsl(${hue}, 100%, 60%)` : settings.color1;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = settings.lineWidth + 0.5;
+    if (settings.glow) setGlow(true, col);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+  setGlow(false);
+
+  // --- Dark planet core ---
+  ctx.beginPath();
+  ctx.arc(cx, cy, baseR, 0, Math.PI * 2);
+  const coreGrad = ctx.createRadialGradient(cx - baseR * 0.25, cy - baseR * 0.25, baseR * 0.05, cx, cy, baseR);
+  coreGrad.addColorStop(0, '#2a2a3a');
+  coreGrad.addColorStop(1, '#06060f');
+  ctx.fillStyle = coreGrad;
+  ctx.fill();
+
+  // --- Planet core border glow ---
+  if (settings.glow) {
+    ctx.shadowBlur = 22 + beatValue * 20;
+    ctx.shadowColor = settings.color1;
+  }
+  ctx.strokeStyle = settings.color1;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  setGlow(false);
+
+  // --- Inner shimmer circle ---
+  ctx.beginPath();
+  ctx.arc(cx, cy, baseR * 0.55, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(255,255,255,0.06)`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // --- Tilted Saturn ring (back half — drawn under planet) ---
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(planetRingAngle * 0.4);
+  ctx.scale(1, 0.28); // tilt effect
+
+  const ringR1 = baseR * 1.55 + beatValue * 10;
+  const ringR2 = baseR * 2.1 + beatValue * 14;
+
+  // Back arc (behind planet visually) — drawn first, will be covered by planet
+  const ringGradBack = ctx.createLinearGradient(-ringR2, 0, ringR2, 0);
+  ringGradBack.addColorStop(0, 'rgba(0,0,0,0)');
+  ringGradBack.addColorStop(0.3, settings.color2 + 'aa');
+  ringGradBack.addColorStop(0.5, settings.color1 + 'cc');
+  ringGradBack.addColorStop(0.7, settings.color2 + 'aa');
+  ringGradBack.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ctx.beginPath();
+  ctx.arc(0, 0, ringR2, Math.PI, Math.PI * 2); // top half = behind
+  ctx.arc(0, 0, ringR1, Math.PI * 2, Math.PI, true);
+  ctx.closePath();
+  ctx.fillStyle = ringGradBack;
+  if (settings.glow) { ctx.shadowBlur = 18; ctx.shadowColor = settings.color2; }
+  ctx.fill();
+  setGlow(false);
+  ctx.restore();
+
+  // --- Re-draw planet core to cover back of ring ---
+  ctx.beginPath();
+  ctx.arc(cx, cy, baseR, 0, Math.PI * 2);
+  ctx.fillStyle = coreGrad;
+  ctx.fill();
+
+  // --- Front half of ring (in front of planet) ---
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(planetRingAngle * 0.4);
+  ctx.scale(1, 0.28);
+
+  const ringGradFront = ctx.createLinearGradient(-ringR2, 0, ringR2, 0);
+  ringGradFront.addColorStop(0, 'rgba(0,0,0,0)');
+  ringGradFront.addColorStop(0.25, settings.color2 + 'cc');
+  ringGradFront.addColorStop(0.5, settings.color1 + 'ff');
+  ringGradFront.addColorStop(0.75, settings.color2 + 'cc');
+  ringGradFront.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ctx.beginPath();
+  ctx.arc(0, 0, ringR2, 0, Math.PI); // bottom half = front
+  ctx.arc(0, 0, ringR1, Math.PI, 0, true);
+  ctx.closePath();
+  ctx.fillStyle = ringGradFront;
+  if (settings.glow) { ctx.shadowBlur = 24 + beatValue * 18; ctx.shadowColor = settings.color1; }
+  ctx.fill();
+  setGlow(false);
+  ctx.restore();
+
+  // --- Center icon: ghost-like glowing orb ---
+  const iconR = baseR * 0.38;
+  const iconGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, iconR);
+  iconGrad.addColorStop(0, 'rgba(255,255,255,0.18)');
+  iconGrad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, iconR, 0, Math.PI * 2);
+  ctx.fillStyle = iconGrad;
+  ctx.fill();
+
+  // White center dot
+  ctx.beginPath();
+  ctx.arc(cx, cy, iconR * 0.22, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(255,255,255,${0.4 + beatValue * 0.5})`;
+  if (settings.glow) { ctx.shadowBlur = 14; ctx.shadowColor = '#fff'; }
+  ctx.fill();
+  setGlow(false);
+}
+
 // =============================================
 // PREVIEW ANIMATION
 // =============================================
@@ -1107,7 +1244,7 @@ function startPreviewAnimation() {
 // CONTROLS
 // =============================================
 function setMode(mode) {
-  const premiumModes = ['particles', 'tunnel', 'liquid', 'fractal', 'matrix', 'dna', 'galaxy_mode'];
+  const premiumModes = ['particles', 'tunnel', 'liquid', 'fractal', 'matrix', 'dna', 'galaxy_mode', 'planet'];
   if (premiumModes.includes(mode) && !isPremium) {
     showToast('🔒 Premium mode! Upgrade to unlock.', 'error');
     showPage('pricing-page'); return;
@@ -1157,6 +1294,8 @@ function updateSettings() {
   settings.stars = document.getElementById('stars-toggle').checked;
   settings.flash = document.getElementById('flash-toggle').checked;
   settings.beatShake = document.getElementById('beatshake-toggle').checked;
+  settings.shakeStrength = parseInt(document.getElementById('shake-strength').value);
+  document.getElementById('shake-strength-val').textContent = settings.shakeStrength;
   document.getElementById('sensitivity-val').textContent = settings.sensitivity;
   document.getElementById('smoothing-val').textContent = settings.smoothing;
   document.getElementById('barcount-val').textContent = settings.barCount;
