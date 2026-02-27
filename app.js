@@ -41,7 +41,7 @@ let settings = {
   bgColor: '#0a0a0f', bgType: 'color', bgOpacity: 80,
   sensitivity: 5, smoothing: 80, barCount: 64, lineWidth: 2,
   rotSpeed: 3, glow: true, mirror: false, beatPulse: true,
-  gradient: true, stars: false, flash: false, eq: 'flat',
+  gradient: true, stars: false, flash: false, beatShake: true, eq: 'flat',
 };
 
 let adminSettings = {
@@ -676,7 +676,10 @@ function detectBPM(dataArray) {
     dot.classList.add('beat');
     clearTimeout(bpmFlashTimeout);
     bpmFlashTimeout = setTimeout(() => dot.classList.remove('beat'), 80);
-  }
+    // Trigger beat shake
+    if (settings.beatShake) {
+      shakeIntensity = 6 + (bass / 255) * 10;
+    }
 }
 
 // =============================================
@@ -725,6 +728,12 @@ window.addEventListener('resize', resizeCanvas);
 let beatValue = 0;
 let flashAlpha = 0;
 
+// Beat Shake state
+let shakeIntensity = 0;
+let shakeDecay = 0.85;
+let shakeX = 0;
+let shakeY = 0;
+
 function startVisualization() {
   if (animationId) cancelAnimationFrame(animationId);
   if (!mainCanvas || !ctx || !analyser) return;
@@ -752,6 +761,18 @@ function startVisualization() {
     const sens = settings.sensitivity;
     const n = Math.min(settings.barCount, bufferLength);
 
+    // Beat Shake — translate canvas randomly scaled to shakeIntensity
+    if (settings.beatShake && shakeIntensity > 0.3) {
+      shakeX = (Math.random() - 0.5) * shakeIntensity * 2;
+      shakeY = (Math.random() - 0.5) * shakeIntensity * 2;
+      shakeIntensity *= shakeDecay;
+      ctx.save();
+      ctx.translate(shakeX, shakeY);
+    } else {
+      shakeIntensity = 0;
+      shakeX = 0; shakeY = 0;
+    }
+
     switch (settings.mode) {
       case 'bars':     drawBars(dataArray, W, H, n, sens); break;
       case 'wave':     drawWave(dataArray, W, H, bufferLength, sens); break;
@@ -765,6 +786,11 @@ function startVisualization() {
       case 'matrix':   drawMatrix(dataArray, W, H, n, sens); break;
       case 'dna':      drawDNA(dataArray, W, H, bufferLength, sens); break;
       case 'galaxy_mode': drawGalaxy(dataArray, W, H, n, sens); break;
+    }
+
+    // Restore shake transform
+    if (settings.beatShake && (shakeX !== 0 || shakeY !== 0)) {
+      ctx.restore();
     }
 
     // Beat flash effect
@@ -1124,6 +1150,7 @@ function updateSettings() {
   settings.gradient = document.getElementById('gradient-toggle').checked;
   settings.stars = document.getElementById('stars-toggle').checked;
   settings.flash = document.getElementById('flash-toggle').checked;
+  settings.beatShake = document.getElementById('beatshake-toggle').checked;
   document.getElementById('sensitivity-val').textContent = settings.sensitivity;
   document.getElementById('smoothing-val').textContent = settings.smoothing;
   document.getElementById('barcount-val').textContent = settings.barCount;
