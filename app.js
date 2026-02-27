@@ -81,7 +81,10 @@ function hideSplash() {
   setTimeout(() => {
     splash.style.opacity = '0';
     splash.style.transition = 'opacity 0.6s ease';
-    setTimeout(() => { splash.style.display = 'none'; }, 650);
+    setTimeout(() => {
+      splash.style.display = 'none';
+      try { splash.remove(); } catch(e) {}
+    }, 650);
   }, 1800);
 }
 
@@ -114,13 +117,15 @@ function closeMobileMenu() {
 // PAGE NAVIGATION
 // =============================================
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const page = document.getElementById(id);
-  if (page) page.classList.add('active');
-  if (id === 'app-page') { setupAppCanvas(); updateUserDisplay(); }
-  if (id === 'admin-panel-page' && isAdminLoggedIn) refreshAdminPanel();
-  if (id === 'landing-page') startPreviewAnimation();
-  closeMobileMenu();
+  try {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const page = document.getElementById(id);
+    if (page) page.classList.add('active');
+    if (id === 'app-page') { try { setupAppCanvas(); } catch(e){} try { updateUserDisplay(); } catch(e){} }
+    if (id === 'admin-panel-page' && isAdminLoggedIn) try { refreshAdminPanel(); } catch(e){}
+    if (id === 'landing-page') try { startPreviewAnimation(); } catch(e){}
+    try { closeMobileMenu(); } catch(e){}
+  } catch(e) {}
 }
 
 // =============================================
