@@ -1208,39 +1208,56 @@ function escHtml(s) {
 // INIT
 // =============================================
 window.addEventListener('load', () => {
-  // Add panel backdrop for mobile
-  const backdrop = document.createElement('div');
-  backdrop.id = 'panel-backdrop';
-  backdrop.className = 'panel-backdrop';
-  backdrop.onclick = closeMobileControls;
-  document.body.appendChild(backdrop);
 
-  loadAdminSettings();
-
-  // Check admin route BEFORE session check so #admin still works
-  if (window.location.hash === '#admin') {
-    showPage('admin-login-page');
-  } else if (checkSession()) {
-    showPage('app-page');
-  } else {
-    // ✅ FIX: showPage('landing-page') also calls startPreviewAnimation internally
-    showPage('landing-page');
-  }
-
+  // ✅ ALWAYS hide splash first — no matter what else happens
   hideSplash();
 
-  window.addEventListener('hashchange', () => {
-    if (window.location.hash === '#admin') showPage('admin-login-page');
-  });
+  try {
+    // Add panel backdrop for mobile
+    const backdrop = document.createElement('div');
+    backdrop.id = 'panel-backdrop';
+    backdrop.className = 'panel-backdrop';
+    backdrop.onclick = closeMobileControls;
+    document.body.appendChild(backdrop);
+  } catch(e) {}
 
-  const ro = new ResizeObserver(resizeCanvas);
-  const c = document.getElementById('main-canvas');
-  if (c) ro.observe(c);
+  try { loadAdminSettings(); } catch(e) {}
 
-  document.getElementById('viz-text-overlay').classList.add('bottom-left');
+  // Route to correct page
+  try {
+    if (window.location.hash === '#admin') {
+      showPage('admin-login-page');
+    } else if (checkSession()) {
+      showPage('app-page');
+    } else {
+      showPage('landing-page');
+    }
+  } catch(e) {
+    // If anything fails, always fall back to landing page
+    try { showPage('landing-page'); } catch(e2) {}
+  }
 
-  // Handle Enter key on login/signup forms
-  document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-  document.getElementById('signup-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleSignup(); });
-  document.getElementById('admin-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleAdminLogin(); });
+  try {
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#admin') showPage('admin-login-page');
+    });
+  } catch(e) {}
+
+  try {
+    const ro = new ResizeObserver(resizeCanvas);
+    const c = document.getElementById('main-canvas');
+    if (c) ro.observe(c);
+  } catch(e) {}
+
+  try {
+    const ov = document.getElementById('viz-text-overlay');
+    if (ov) ov.classList.add('bottom-left');
+  } catch(e) {}
+
+  try {
+    document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+    document.getElementById('signup-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleSignup(); });
+    document.getElementById('admin-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleAdminLogin(); });
+  } catch(e) {}
+
 });
