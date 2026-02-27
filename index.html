@@ -242,6 +242,7 @@
           <button class="mode-btn premium-mode" data-mode="dna" onclick="setMode('dna')">DNA 💎</button>
           <button class="mode-btn premium-mode" data-mode="galaxy" onclick="setMode('galaxy_mode')">Galaxy 💎</button>
           <button class="mode-btn premium-mode" data-mode="planet" onclick="setMode('planet')">Planet 💎</button>
+          <button class="mode-btn premium-mode" data-mode="cross" onclick="setMode('cross')">Cross 💎</button>
         </div>
       </div>
 
@@ -328,6 +329,10 @@
         <label>Rotation Speed
           <input type="range" id="rotspeed" min="0" max="10" value="3" oninput="updateSettings()">
           <span id="rotspeed-val">3</span>
+        </label>
+        <label>Viz Opacity
+          <input type="range" id="viz-opacity" min="10" max="100" value="100" oninput="updateSettings()">
+          <span id="viz-opacity-val">100</span>
         </label>
       </div>
 
