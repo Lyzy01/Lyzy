@@ -41,7 +41,7 @@ let settings = {
   bgColor: '#0a0a0f', bgType: 'color', bgOpacity: 80,
   sensitivity: 5, smoothing: 80, barCount: 64, lineWidth: 2,
   rotSpeed: 3, glow: true, mirror: false, beatPulse: true,
-  gradient: true, stars: false, flash: false, beatShake: true, shakeStrength: 18, eq: 'flat',
+  gradient: true, stars: false, flash: false, beatShake: true, shakeStrength: 18, vizOpacity: 100, eq: 'flat',
 };
 
 let adminSettings = {
@@ -789,6 +789,9 @@ function startVisualization() {
       shakeX = 0; shakeY = 0;
     }
 
+    // Apply visualizer opacity
+    ctx.globalAlpha = settings.vizOpacity / 100;
+
     switch (settings.mode) {
       case 'bars':     drawBars(dataArray, W, H, n, sens); break;
       case 'wave':     drawWave(dataArray, W, H, bufferLength, sens); break;
@@ -803,7 +806,11 @@ function startVisualization() {
       case 'dna':      drawDNA(dataArray, W, H, bufferLength, sens); break;
       case 'galaxy_mode': drawGalaxy(dataArray, W, H, n, sens); break;
       case 'planet':   drawPlanet(dataArray, W, H, n, sens); break;
+      case 'cross':    drawCross(dataArray, W, H, n, sens); break;
     }
+
+    // Reset opacity
+    ctx.globalAlpha = 1;
 
     // Restore shake transform
     if (settings.beatShake && (shakeX !== 0 || shakeY !== 0)) {
@@ -1207,6 +1214,97 @@ function drawPlanet(data, W, H, n, sens) {
   setGlow(false);
 }
 
+// 14. CROSS / X-BARS
+function drawCross(data, W, H, n, sens) {
+  const cx = W / 2, cy = H / 2;
+  const coreR = Math.min(W, H) * 0.12 + beatValue * 10;
+
+  // 4 diagonal arms: NE, NW, SE, SW  (45°, 135°, 225°, 315°)
+  const arms = [
+    { angle: -Math.PI * 0.25,  flip: 1  },
+    { angle: -Math.PI * 0.75,  flip: 1  },
+    { angle:  Math.PI * 0.75,  flip: 1  },
+    { angle:  Math.PI * 0.25,  flip: 1  },
+  ];
+
+  const barsPerArm = Math.floor(n / 4);
+
+  arms.forEach((arm, ai) => {
+    const cos = Math.cos(arm.angle);
+    const sin = Math.sin(arm.angle);
+    // perpendicular axis to spread bars sideways along arm
+    const px = -sin, py = cos;
+
+    for (let i = 0; i < barsPerArm; i++) {
+      const idx = ai * barsPerArm + i;
+      const val = (data[idx] / 255) * sens * 0.55;
+      const barLen = Math.max(2, val * Math.min(W, H) * 0.45);
+
+      // Offset sideways from center of arm
+      const spread = (i / barsPerArm - 0.5) * coreR * 2.2;
+      const startX = cx + px * spread + cos * coreR;
+      const startY = cy + py * spread + sin * coreR;
+      const endX   = startX + cos * barLen;
+      const endY   = startY + sin * barLen;
+
+      // Bar width tapers based on position
+      const barW = Math.max(1.5, (settings.lineWidth + 1) * (1 - Math.abs(i / barsPerArm - 0.5) * 1.2));
+
+      const hue = (idx / n) * 200 + 160 + rotAngle * 40;
+      const col = settings.gradient ? `hsl(${hue}, 100%, 60%)` : settings.color1;
+
+      ctx.strokeStyle = col;
+      ctx.lineWidth = barW;
+      ctx.lineCap = 'round';
+      if (settings.glow) setGlow(true, col);
+
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+    }
+  });
+  setGlow(false);
+
+  // Dark core circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+  const coreG = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
+  coreG.addColorStop(0, '#1a1a2e');
+  coreG.addColorStop(1, '#06060f');
+  ctx.fillStyle = coreG;
+  ctx.globalAlpha = settings.vizOpacity / 100;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Core border glow ring
+  if (settings.glow) { ctx.shadowBlur = 20 + beatValue * 18; ctx.shadowColor = settings.color1; }
+  ctx.strokeStyle = settings.color1;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Inner glow ring
+  ctx.strokeStyle = settings.color2;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR * 0.65, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  setGlow(false);
+
+  // Center pulse dot
+  ctx.beginPath();
+  ctx.arc(cx, cy, coreR * 0.18 + beatValue * 5, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(255,255,255,${0.35 + beatValue * 0.55})`;
+  if (settings.glow) { ctx.shadowBlur = 12; ctx.shadowColor = '#fff'; }
+  ctx.fill();
+  setGlow(false);
+  ctx.lineCap = 'butt';
+}
+
 // =============================================
 // PREVIEW ANIMATION
 // =============================================
@@ -1244,7 +1342,7 @@ function startPreviewAnimation() {
 // CONTROLS
 // =============================================
 function setMode(mode) {
-  const premiumModes = ['particles', 'tunnel', 'liquid', 'fractal', 'matrix', 'dna', 'galaxy_mode', 'planet'];
+  const premiumModes = ['particles', 'tunnel', 'liquid', 'fractal', 'matrix', 'dna', 'galaxy_mode', 'planet', 'cross'];
   if (premiumModes.includes(mode) && !isPremium) {
     showToast('🔒 Premium mode! Upgrade to unlock.', 'error');
     showPage('pricing-page'); return;
@@ -1296,6 +1394,8 @@ function updateSettings() {
   settings.beatShake = document.getElementById('beatshake-toggle').checked;
   settings.shakeStrength = parseInt(document.getElementById('shake-strength').value);
   document.getElementById('shake-strength-val').textContent = settings.shakeStrength;
+  settings.vizOpacity = parseInt(document.getElementById('viz-opacity').value);
+  document.getElementById('viz-opacity-val').textContent = settings.vizOpacity;
   document.getElementById('sensitivity-val').textContent = settings.sensitivity;
   document.getElementById('smoothing-val').textContent = settings.smoothing;
   document.getElementById('barcount-val').textContent = settings.barCount;
