@@ -241,6 +241,7 @@
           <button class="mode-btn premium-mode" data-mode="matrix" onclick="setMode('matrix')">Matrix 💎</button>
           <button class="mode-btn premium-mode" data-mode="dna" onclick="setMode('dna')">DNA 💎</button>
           <button class="mode-btn premium-mode" data-mode="galaxy" onclick="setMode('galaxy_mode')">Galaxy 💎</button>
+          <button class="mode-btn premium-mode" data-mode="planet" onclick="setMode('planet')">Planet 💎</button>
         </div>
       </div>
 
@@ -349,6 +350,10 @@
         <label class="toggle-label"><input type="checkbox" id="stars-toggle" onchange="updateSettings()"> Star Background</label>
         <label class="toggle-label"><input type="checkbox" id="flash-toggle" onchange="updateSettings()"> Beat Flash</label>
         <label class="toggle-label"><input type="checkbox" id="beatshake-toggle" checked onchange="updateSettings()"> Beat Shake 🌊</label>
+        <label>Shake Strength
+          <input type="range" id="shake-strength" min="1" max="40" value="18" oninput="updateSettings()">
+          <span id="shake-strength-val">18</span>
+        </label>
       </div>
 
       <div class="panel-section">
