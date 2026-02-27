@@ -80,12 +80,12 @@ function hideSplash() {
   if (!splash) return;
   setTimeout(() => {
     splash.style.opacity = '0';
-    splash.style.transition = 'opacity 0.6s ease';
+    splash.style.transition = 'opacity 0.5s ease';
     setTimeout(() => {
       splash.style.display = 'none';
       try { splash.remove(); } catch(e) {}
-    }, 650);
-  }, 1800);
+    }, 520);
+  }, 600);
 }
 
 // =============================================
@@ -685,6 +685,7 @@ function detectBPM(dataArray) {
     if (settings.beatShake) {
       shakeIntensity = 6 + (bass / 255) * 10;
     }
+  }  // closes: if (bass > 180 && now - lastBeat > 250)
 }
 
 // =============================================
