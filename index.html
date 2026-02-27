@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lyzy — Music Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash-screen">
+  <div class="splash-logo">
+    <span class="splash-l">L</span><span class="splash-y">Y</span><span class="splash-z">Z</span><span class="splash-y2">Y</span>
+  </div>
+  <div class="splash-bars">
+    <div class="splash-bar"></div><div class="splash-bar"></div><div class="splash-bar"></div>
+    <div class="splash-bar"></div><div class="splash-bar"></div><div class="splash-bar"></div>
+    <div class="splash-bar"></div><div class="splash-bar"></div>
+  </div>
+  <p class="splash-sub">Music Visualizer</p>
+</div>
+
+<!-- LANDING PAGE -->
+<div id="landing-page" class="page">
+  <nav class="navbar">
+    <div class="logo">LYZY</div>
+    <div class="nav-links">
+      <a href="#" onclick="showPage('pricing-page')">Pricing</a>
+      <a href="#" onclick="showPage('login-page')">Login</a>
+      <button class="btn-primary" onclick="showPage('signup-page')">Get Started</button>
+    </div>
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#" onclick="showPage('pricing-page');closeMobileMenu()">Pricing</a>
+    <a href="#" onclick="showPage('login-page');closeMobileMenu()">Login</a>
+    <a href="#" onclick="showPage('signup-page');closeMobileMenu()">Sign Up Free</a>
+  </div>
+
+  <div class="hero">
+    <div class="hero-badge animate-fade-in">🎵 Next-Gen Audio Visualizer</div>
+    <h1 class="animate-slide-up">Bring Your Music<br><span class="accent">to Life</span></h1>
+    <p class="hero-sub animate-slide-up delay-1">Lyzy transforms your audio into stunning real-time visuals. Perfect for streamers, DJs, and creators.</p>
+    <div class="hero-btns animate-slide-up delay-2">
+      <button class="btn-primary large" onclick="showPage('signup-page')">Start Free</button>
+      <button class="btn-ghost large" onclick="showPage('login-page')">Sign In</button>
+    </div>
+    <div class="hero-preview animate-fade-in delay-3">
+      <canvas id="preview-canvas"></canvas>
+      <div class="preview-overlay"><span>🎶 Live Preview</span></div>
+    </div>
+  </div>
+
+  <div class="features">
+    <h2>Why Lyzy?</h2>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">⚡</div><h3>Real-Time</h3><p>Zero latency visualization with WebAudio API</p></div>
+      <div class="feature-card"><div class="feature-icon">🎨</div><h3>12+ Visual Modes</h3><p>Bars, waves, circular, particles, DNA, galaxy & more</p></div>
+      <div class="feature-card"><div class="feature-icon">📱</div><h3>Mobile Ready</h3><p>Fully optimized for phones and tablets</p></div>
+      <div class="feature-card"><div class="feature-icon">💎</div><h3>Premium Themes</h3><p>Exclusive visual themes for premium members</p></div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="logo">LYZY</div>
+    <p>© 2024 Lyzy. All rights reserved.</p>
+  </footer>
+</div>
+
+<!-- LOGIN PAGE -->
+<div id="login-page" class="page">
+  <div class="auth-container">
+    <div class="auth-card animate-pop">
+      <div class="auth-logo-wrap">
+        <div class="logo">LYZY</div>
+        <div class="auth-logo-glow"></div>
+      </div>
+      <h2>Welcome back</h2>
+      <p class="auth-sub">Sign in to your account</p>
+      <button class="btn-google" onclick="handleGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider"><span>or</span></div>
+      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="you@email.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+      <div id="login-error" class="error-msg"></div>
+      <button class="btn-primary full" onclick="handleLogin()">Sign In</button>
+      <p class="auth-footer">Don't have an account? <a href="#" onclick="showPage('signup-page')">Sign up</a></p>
+      <p class="auth-footer"><a href="#" onclick="showPage('landing-page')">← Back to home</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP PAGE -->
+<div id="signup-page" class="page">
+  <div class="auth-container">
+    <div class="auth-card animate-pop">
+      <div class="auth-logo-wrap">
+        <div class="logo">LYZY</div>
+        <div class="auth-logo-glow"></div>
+      </div>
+      <h2>Create account</h2>
+      <p class="auth-sub">Join thousands of creators</p>
+      <button class="btn-google" onclick="handleGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
+        Sign up with Google
+      </button>
+      <div class="divider"><span>or</span></div>
+      <div class="form-group"><label>Name</label><input type="text" id="signup-name" placeholder="Your name"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="signup-email" placeholder="you@email.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="signup-password" placeholder="••••••••"></div>
+      <div id="signup-error" class="error-msg"></div>
+      <button class="btn-primary full" onclick="handleSignup()">Create Account</button>
+      <p class="auth-footer">Already have an account? <a href="#" onclick="showPage('login-page')">Sign in</a></p>
+      <p class="auth-footer"><a href="#" onclick="showPage('landing-page')">← Back to home</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING PAGE -->
+<div id="pricing-page" class="page">
+  <nav class="navbar">
+    <div class="logo">LYZY</div>
+    <div class="nav-links"><a href="#" onclick="history.back()">← Back</a></div>
+  </nav>
+  <div class="pricing-container">
+    <h1>Simple Pricing</h1>
+    <p class="pricing-sub">Start free, upgrade when you're ready</p>
+    <div class="pricing-grid">
+      <div class="pricing-card animate-slide-up">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">₱0<span>/mo</span></div>
+        <ul class="plan-features">
+          <li>✅ 5 Visual modes</li>
+          <li>✅ Basic color themes</li>
+          <li>✅ Microphone input</li>
+          <li>✅ Upload MP3 files</li>
+          <li>✅ Artist & Song overlay</li>
+          <li>✅ Background image</li>
+          <li>✅ Watermark toggle</li>
+          <li>✅ Hide UI for recording</li>
+          <li>✅ BPM / Beat detector</li>
+          <li>❌ Premium visual modes</li>
+          <li>❌ Premium themes</li>
+          <li>❌ Background video</li>
+          <li>❌ Screenshot export</li>
+        </ul>
+        <button class="btn-ghost full" onclick="showPage('signup-page')">Get Started Free</button>
+      </div>
+      <div class="pricing-card featured animate-slide-up delay-1">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">₱99<span>/mo</span></div>
+        <ul class="plan-features">
+          <li>✅ All 12+ visual modes</li>
+          <li>✅ All color themes</li>
+          <li>✅ Mic + MP3 upload</li>
+          <li>✅ Artist & Song overlay</li>
+          <li>✅ Background image & video</li>
+          <li>✅ Premium themes</li>
+          <li>✅ Screenshot export</li>
+          <li>✅ BPM detector</li>
+          <li>✅ Equalizer presets</li>
+          <li>✅ Priority support</li>
+          <li>✅ Lifetime access</li>
+        </ul>
+        <button class="btn-primary full" onclick="showGcashModal()">Subscribe via GCash</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP PAGE -->
+<div id="app-page" class="page">
+  <!-- App Navbar -->
+  <nav class="app-navbar" id="app-navbar">
+    <div class="logo">LYZY</div>
+    <div class="app-nav-right">
+      <span id="user-name-display" class="user-chip"></span>
+      <span id="premium-badge" class="premium-chip" style="display:none">💎 Premium</span>
+      <button class="btn-ghost small" onclick="showPage('pricing-page')" id="upgrade-btn">Upgrade</button>
+      <button class="btn-ghost small" onclick="logout()">Logout</button>
+    </div>
+    <button class="mobile-controls-btn" id="mobile-controls-btn" onclick="toggleMobileControls()">🎛️</button>
+  </nav>
+
+  <!-- BPM Bar -->
+  <div class="bpm-bar" id="bpm-bar">
+    <span class="bpm-label">BPM</span>
+    <span class="bpm-value" id="bpm-display">--</span>
+    <div class="bpm-dot" id="bpm-dot"></div>
+    <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted)" id="now-playing-bar"></span>
+    <button class="bpm-hide" onclick="document.getElementById('bpm-bar').style.display='none'">✕</button>
+  </div>
+
+  <div class="app-layout" id="app-layout">
+
+    <!-- Controls Panel -->
+    <div class="controls-panel" id="controls-panel">
+      <button class="panel-close-btn" onclick="closeMobileControls()">✕ Close</button>
+
+      <div class="panel-section">
+        <h3>Input</h3>
+        <button class="btn-primary full" id="mic-btn" onclick="toggleMic()">🎤 Use Microphone</button>
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('audio-file').click()">
+          <span>🎵 Upload MP3 / Audio</span>
+          <small id="upload-label">Click to browse</small>
+        </div>
+        <input type="file" id="audio-file" accept="audio/*" style="display:none" onchange="loadAudioFile(event)">
+        <div id="audio-player" style="display:none;margin-top:0.6rem">
+          <div class="audio-controls">
+            <button onclick="togglePause()" id="pause-btn" class="audio-btn">⏸</button>
+            <button onclick="stopAudio()" class="audio-btn">⏹</button>
+            <div class="audio-progress-wrap">
+              <input type="range" id="audio-seek" min="0" max="100" value="0" oninput="seekAudio()" class="audio-seek">
+            </div>
+            <span id="audio-time" class="audio-time">0:00</span>
+          </div>
+          <label>Volume
+            <input type="range" id="volume" min="0" max="100" value="80" oninput="updateVolume()">
+            <span id="volume-val">80</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Visual Mode</h3>
+        <div class="mode-grid">
+          <button class="mode-btn active" data-mode="bars" onclick="setMode('bars')">Bars</button>
+          <button class="mode-btn" data-mode="wave" onclick="setMode('wave')">Wave</button>
+          <button class="mode-btn" data-mode="circular" onclick="setMode('circular')">Radial</button>
+          <button class="mode-btn" data-mode="mirror" onclick="setMode('mirror')">Mirror</button>
+          <button class="mode-btn" data-mode="scope" onclick="setMode('scope')">Scope</button>
+          <button class="mode-btn premium-mode" data-mode="particles" onclick="setMode('particles')">Particles 💎</button>
+          <button class="mode-btn premium-mode" data-mode="tunnel" onclick="setMode('tunnel')">Tunnel 💎</button>
+          <button class="mode-btn premium-mode" data-mode="liquid" onclick="setMode('liquid')">Liquid 💎</button>
+          <button class="mode-btn premium-mode" data-mode="fractal" onclick="setMode('fractal')">Fractal 💎</button>
+          <button class="mode-btn premium-mode" data-mode="matrix" onclick="setMode('matrix')">Matrix 💎</button>
+          <button class="mode-btn premium-mode" data-mode="dna" onclick="setMode('dna')">DNA 💎</button>
+          <button class="mode-btn premium-mode" data-mode="galaxy" onclick="setMode('galaxy_mode')">Galaxy 💎</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Colors & Theme</h3>
+        <div class="theme-grid">
+          <div class="theme-swatch active" data-theme="neon" onclick="setTheme('neon')" style="background:linear-gradient(135deg,#00ffcc,#ff00ff)" title="Neon"></div>
+          <div class="theme-swatch" data-theme="fire" onclick="setTheme('fire')" style="background:linear-gradient(135deg,#ff4500,#ffcc00)" title="Fire"></div>
+          <div class="theme-swatch" data-theme="ocean" onclick="setTheme('ocean')" style="background:linear-gradient(135deg,#0066ff,#00ffcc)" title="Ocean"></div>
+          <div class="theme-swatch" data-theme="blood" onclick="setTheme('blood')" style="background:linear-gradient(135deg,#ff0033,#330000)" title="Blood"></div>
+          <div class="theme-swatch" data-theme="mint" onclick="setTheme('mint')" style="background:linear-gradient(135deg,#00ff88,#00cc44)" title="Mint"></div>
+          <div class="theme-swatch premium-swatch" data-theme="galaxy_t" onclick="setTheme('galaxy_t')" style="background:linear-gradient(135deg,#6600ff,#ff00ff)" title="Galaxy 💎"></div>
+          <div class="theme-swatch premium-swatch" data-theme="sunset" onclick="setTheme('sunset')" style="background:linear-gradient(135deg,#ff6b35,#f7c59f)" title="Sunset 💎"></div>
+          <div class="theme-swatch premium-swatch" data-theme="acid" onclick="setTheme('acid')" style="background:linear-gradient(135deg,#39ff14,#ffff00)" title="Acid 💎"></div>
+          <div class="theme-swatch premium-swatch" data-theme="ice" onclick="setTheme('ice')" style="background:linear-gradient(135deg,#a8edea,#fed6e3)" title="Ice 💎"></div>
+        </div>
+        <label>Primary <input type="color" id="color1" value="#00ffcc" oninput="updateCustomColor()"></label>
+        <label>Secondary <input type="color" id="color2" value="#ff00ff" oninput="updateCustomColor()"></label>
+        <label>Background <input type="color" id="bgColor" value="#0a0a0f" oninput="updateBgColor()"></label>
+      </div>
+
+      <div class="panel-section">
+        <h3>Background</h3>
+        <div class="bg-options">
+          <button class="bg-opt-btn active" onclick="setBgType('color',this)">Color</button>
+          <button class="bg-opt-btn" onclick="setBgType('image',this)">Image</button>
+          <button class="bg-opt-btn" onclick="setBgType('video',this)">Video 💎</button>
+        </div>
+        <div id="bg-image-area" style="display:none;margin-top:0.5rem">
+          <div class="upload-area small-upload" onclick="document.getElementById('bg-file').click()">🖼️ Upload Background Image</div>
+          <input type="file" id="bg-file" accept="image/*" style="display:none" onchange="loadBgImage(event)">
+          <label style="margin-top:0.5rem">Opacity
+            <input type="range" id="bg-opacity" min="0" max="100" value="80" oninput="updateBgOpacity()">
+            <span id="bg-opacity-val">80</span>
+          </label>
+        </div>
+        <div id="bg-video-area" style="display:none;margin-top:0.5rem">
+          <div class="upload-area small-upload" onclick="checkPremiumThen(()=>document.getElementById('bg-video-file').click())">🎬 Upload Background Video 💎</div>
+          <input type="file" id="bg-video-file" accept="video/*" style="display:none" onchange="loadBgVideo(event)">
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Overlay Info</h3>
+        <label class="toggle-label"><input type="checkbox" id="show-artist" onchange="updateOverlay()"> Show Artist Name</label>
+        <input type="text" id="artist-name" placeholder="Artist name..." class="text-input" oninput="updateOverlay()">
+        <label class="toggle-label" style="margin-top:0.5rem"><input type="checkbox" id="show-song" onchange="updateOverlay()"> Show Song Name</label>
+        <input type="text" id="song-name" placeholder="Song name..." class="text-input" oninput="updateOverlay()">
+        <label class="toggle-label" style="margin-top:0.5rem"><input type="checkbox" id="show-watermark" checked onchange="updateOverlay()"> Watermark</label>
+        <div class="form-group" style="margin-top:0.5rem">
+          <label>Position</label>
+          <select id="overlay-position" onchange="updateOverlay()" class="select-input">
+            <option value="bottom-left">Bottom Left</option>
+            <option value="bottom-center">Bottom Center</option>
+            <option value="bottom-right">Bottom Right</option>
+            <option value="top-left">Top Left</option>
+            <option value="top-right">Top Right</option>
+          </select>
+        </div>
+        <label>Text Size
+          <input type="range" id="text-size" min="10" max="30" value="16" oninput="updateOverlay()">
+          <span id="text-size-val">16</span>
+        </label>
+      </div>
+
+      <div class="panel-section">
+        <h3>Settings</h3>
+        <label>Sensitivity
+          <input type="range" id="sensitivity" min="1" max="10" value="5" oninput="updateSettings()">
+          <span id="sensitivity-val">5</span>
+        </label>
+        <label>Smoothing
+          <input type="range" id="smoothing" min="0" max="99" value="80" oninput="updateSettings()">
+          <span id="smoothing-val">80</span>
+        </label>
+        <label>Bar Count
+          <input type="range" id="barcount" min="16" max="256" value="64" step="8" oninput="updateSettings()">
+          <span id="barcount-val">64</span>
+        </label>
+        <label>Line Width
+          <input type="range" id="linewidth" min="1" max="10" value="2" oninput="updateSettings()">
+          <span id="linewidth-val">2</span>
+        </label>
+        <label>Rotation Speed
+          <input type="range" id="rotspeed" min="0" max="10" value="3" oninput="updateSettings()">
+          <span id="rotspeed-val">3</span>
+        </label>
+      </div>
+
+      <div class="panel-section">
+        <h3>Equalizer Preset</h3>
+        <div class="eq-grid">
+          <button class="eq-btn active" onclick="setEQ('flat',this)">Flat</button>
+          <button class="eq-btn" onclick="setEQ('bass',this)">Bass Boost</button>
+          <button class="eq-btn" onclick="setEQ('treble',this)">Treble</button>
+          <button class="eq-btn" onclick="setEQ('vocal',this)">Vocal</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Effects</h3>
+        <label class="toggle-label"><input type="checkbox" id="glow-toggle" checked onchange="updateSettings()"> Glow Effect</label>
+        <label class="toggle-label"><input type="checkbox" id="mirror-toggle" onchange="updateSettings()"> Mirror Mode</label>
+        <label class="toggle-label"><input type="checkbox" id="beat-toggle" checked onchange="updateSettings()"> Beat Pulse</label>
+        <label class="toggle-label"><input type="checkbox" id="gradient-toggle" checked onchange="updateSettings()"> Gradient Fill</label>
+        <label class="toggle-label"><input type="checkbox" id="stars-toggle" onchange="updateSettings()"> Star Background</label>
+        <label class="toggle-label"><input type="checkbox" id="flash-toggle" onchange="updateSettings()"> Beat Flash</label>
+      </div>
+
+      <div class="panel-section">
+        <h3>Actions</h3>
+        <button class="btn-primary full" id="hide-ui-btn" onclick="toggleHideUI()">🎬 Hide UI (Record)</button>
+        <button class="btn-ghost full" onclick="takeScreenshot()" style="margin-top:0.5rem">📸 Screenshot</button>
+        <button class="btn-ghost full" onclick="showPage('pricing-page')" style="margin-top:0.5rem">💎 Get Premium</button>
+      </div>
+    </div>
+
+    <!-- Visualizer -->
+    <div class="visualizer-container" id="viz-container">
+      <canvas id="main-canvas"></canvas>
+      <div id="bg-layer"></div>
+      <video id="bg-video" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;" loop muted autoplay playsinline></video>
+      <div id="viz-text-overlay"></div>
+      <button id="show-ui-btn" onclick="toggleHideUI()" style="display:none">Show UI</button>
+      <div class="viz-overlay" id="viz-overlay">
+        <div class="idle-message">
+          <div class="idle-icon">🎵</div>
+          <p>Tap "Microphone" or upload an audio file to start</p>
+          <div class="quick-start">
+            <button class="btn-primary" onclick="toggleMic()">🎤 Mic</button>
+            <button class="btn-ghost" onclick="document.getElementById('audio-file').click()">🎵 Upload</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="admin-login-page" class="page">
+  <div class="auth-container">
+    <div class="auth-card animate-pop">
+      <div class="logo">LYZY <span style="font-size:0.5em;color:var(--accent)">ADMIN</span></div>
+      <h2>Admin Access</h2>
+      <div class="form-group"><label>Username</label><input type="text" id="admin-username" placeholder="Admin username" autocomplete="off"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="admin-password" placeholder="••••••••" autocomplete="new-password"></div>
+      <div id="admin-login-error" class="error-msg"></div>
+      <button class="btn-primary full" onclick="handleAdminLogin()">Enter Admin Panel</button>
+      <p class="auth-footer"><a href="#" onclick="showPage('landing-page')">← Back to site</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel-page" class="page">
+  <nav class="app-navbar admin-nav">
+    <div class="logo">LYZY <span style="font-size:0.5em;color:var(--accent)">ADMIN</span></div>
+    <div class="app-nav-right"><button class="btn-ghost small" onclick="adminLogout()">Logout</button></div>
+  </nav>
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <button class="admin-nav-btn active" onclick="showAdminTab('dashboard',this)">📊 Dashboard</button>
+      <button class="admin-nav-btn" onclick="showAdminTab('users',this)">👥 Users</button>
+      <button class="admin-nav-btn" onclick="showAdminTab('payments',this)">💳 Payments</button>
+      <button class="admin-nav-btn" onclick="showAdminTab('settings',this)">⚙️ Settings</button>
+    </div>
+    <div class="admin-content">
+      <div id="tab-dashboard" class="admin-tab active">
+        <h2>Dashboard</h2>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-number" id="stat-users">0</div><div class="stat-label">Total Users</div></div>
+          <div class="stat-card"><div class="stat-number" id="stat-premium">0</div><div class="stat-label">Premium Users</div></div>
+          <div class="stat-card"><div class="stat-number" id="stat-revenue">₱0</div><div class="stat-label">Total Revenue</div></div>
+          <div class="stat-card"><div class="stat-number" id="stat-pending">0</div><div class="stat-label">Pending</div></div>
+        </div>
+        <h3>Recent Activity</h3>
+        <div class="activity-log" id="activity-log"><p class="no-data">No recent activity</p></div>
+      </div>
+      <div id="tab-users" class="admin-tab">
+        <h2>Users</h2>
+        <div class="admin-toolbar"><input type="text" placeholder="Search users..." oninput="filterUsers(this.value)" class="search-input"></div>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="users-table-body"><tr><td colspan="5" class="no-data">No users yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="tab-payments" class="admin-tab">
+        <h2>Payments</h2>
+        <div class="payments-filter">
+          <button class="filter-btn active" onclick="filterPayments('all',this)">All</button>
+          <button class="filter-btn" onclick="filterPayments('pending',this)">Pending</button>
+          <button class="filter-btn" onclick="filterPayments('approved',this)">Approved</button>
+          <button class="filter-btn" onclick="filterPayments('rejected',this)">Rejected</button>
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>User</th><th>Amount</th><th>Ref#</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="payments-table-body"><tr><td colspan="6" class="no-data">No payments yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="tab-settings" class="admin-tab">
+        <h2>Site Settings</h2>
+        <div class="settings-form">
+          <div class="form-group"><label>Premium Price (₱)</label><input type="number" id="admin-price" value="99"></div>
+          <div class="form-group"><label>GCash Number</label><input type="text" id="admin-gcash" value="09538728759"></div>
+          <div class="form-group"><label>GCash Account Name</label><input type="text" id="admin-gcash-name" value="Lyzy Premium"></div>
+          <div class="form-group"><label>Announcement Banner</label><input type="text" id="admin-announcement" placeholder="Leave blank to hide"></div>
+          <button class="btn-primary" onclick="saveAdminSettings()">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GCASH MODAL -->
+<div id="gcash-modal" class="modal-overlay" onclick="closeGcashModal(event)">
+  <div class="modal-card animate-pop">
+    <button class="modal-close" onclick="closeGcashModal()">✕</button>
+    <h2>💎 Upgrade to Premium</h2>
+    <p>Send <strong>₱99</strong> via GCash to:</p>
+    <div class="gcash-info">
+      <div class="gcash-number" id="gcash-display-number">09538728759</div>
+      <div class="gcash-name" id="gcash-display-name">Lyzy Premium</div>
+    </div>
+    <p class="payment-instructions">After sending, enter your reference number. We'll verify within 24 hours and grant you <strong>Lifetime Premium</strong>!</p>
+    <div class="form-group"><label>Your Email</label><input type="email" id="payment-email" placeholder="your@email.com"></div>
+    <div class="form-group"><label>GCash Reference Number</label><input type="text" id="payment-ref" placeholder="e.g. 1234567890"></div>
+    <div id="payment-error" class="error-msg"></div>
+    <button class="btn-primary full" onclick="submitPayment()">Submit Payment</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="app.js"></script>
+</body>
+</html>
